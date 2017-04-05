@@ -1,0 +1,16 @@
+<launch>
+  <param name="use_sim_time" value="true" />
+  <param name="simulator_node/dT" type="double" value="0.1" />
+  <rosparam param="simulator_node/robot_list"> ['mirko','slavko', 'zmirko'] </rosparam>
+  
+  <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 world mirko/odom" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="link2_broadcaster" args="0 0 0 0 0 0 1 world slavko/odom" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="link3_broadckaster" args="0 0 0 0 0 0 1 world zmirko/odom" />
+  
+  <node pkg="rostopic" type="rostopic" name="rostopic_initpose_mirko" args="pub /mirko/initialpose geometry_msgs/Pose  '{position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'"/>
+  <node pkg="rostopic" type="rostopic" name="rostopic_initpose_slavko" args="pub /slavko/initialpose geometry_msgs/Pose  '{position: {x: -1.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'"/>
+  <node pkg="rostopic" type="rostopic" name="rostopic_initpose_zmirko" args="pub /zmirko/initialpose geometry_msgs/Pose  '{position: {x: -3.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'"/>
+  
+  <node pkg="rviz" type="rviz" name="rviz" />
+  <node name="simulator_node" pkg="simulator" type="simulator.py" output="screen" />
+</launch>
