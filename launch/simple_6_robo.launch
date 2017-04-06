@@ -1,0 +1,47 @@
+<launch>
+  <param name="use_sim_time" value="true" />
+  <param name="clock_node/dT" type="double" value="5" />
+  <rosparam param="robot_list"> ['mirko','slavko','zmirko','a','b','c'] </rosparam>
+    
+  <node pkg="rviz" type="rviz" name="rviz" />
+  
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="mirko" />
+    <arg name="init_pose" value="'{position: {x: 1.0, y: 1.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="slavko" />
+    <arg name="init_pose" value="'{position: {x: 0.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="zmirko" />
+    <arg name="init_pose" value="'{position: {x: -1.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+  
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="a" />
+    <arg name="init_pose" value="'{position: {x: -2.0, y: 1.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="b" />
+    <arg name="init_pose" value="'{position: {x: -3.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="c" />
+    <arg name="init_pose" value="'{position: {x: -4.0, y: 0.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
+    <arg name="output" value="log" />
+  </include>
+
+  
+  <node name="simulator_node" pkg="simulator" type="simulator_ideal.py" output="screen" />
+  <node name="clock_node" pkg="simulator" type="clock_node.py" output="screen" />
+</launch>
