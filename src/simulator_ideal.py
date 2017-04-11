@@ -17,6 +17,7 @@ class Simulator:
     def __init__(self):
         rospy.init_node('simulator_node', log_level=rospy.INFO)
         self.robotList = rospy.get_param('robot_list')
+        self.printRealTime = rospy.get_param('show_dt', False)
 
         self.path_sub = dict()
         self.odom_pub = dict()
@@ -132,7 +133,8 @@ class Simulator:
 
     def simulation_node(self, new_time):
         self.newTime = new_time.clock
-        self.print_real_time()
+        if self.showRealTime:
+            self.print_real_time()
         # simulate movement for each individual robot in simulated time
         for robot in self.robotList:
             if not self.crashed[robot]:
