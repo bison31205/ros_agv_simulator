@@ -1,6 +1,7 @@
 <launch>
   <param name="use_sim_time" value="true" />
-  <param name="clock_node/dT" type="double" value="0.1" />
+  <param name="clock_node/dT" type="double" value="0.001" />
+  <param name="simulator_node/show_dt" type="bool" value="False" />
   <rosparam param="robot_list"> ['mirko'] </rosparam>
     
   <node pkg="rviz" type="rviz" name="rviz" />
@@ -8,7 +9,7 @@
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="mirko" />
     <arg name="init_pose" value="'{position: {x: 1.0, y: 1.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0, w: 1.0}}'" />
-    <arg name="output" value="log" />
+    <arg name="output" value="screen" />
   </include>
 
   <node name="simulator_node" pkg="simulator" type="simulator_ideal.py" output="screen" />

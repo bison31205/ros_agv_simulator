@@ -17,14 +17,17 @@ class Simulator:
     def __init__(self):
         rospy.init_node('simulator_node', log_level=rospy.INFO)
         self.robotList = rospy.get_param('robot_list')
-        self.printRealTime = rospy.get_param('show_dt', False)
+        self.showRealTime = rospy.get_param('~show_dt', False)
 
         self.path_sub = dict()
+        self.cmd_vel_sub = dict()
         self.odom_pub = dict()
+        self.traj_pub = dict()
         self.tf_pub = dict()
         self.path = dict()
         self.path_index = dict()
         self.pose = dict()
+        self.cmd_vel = dict()
         self.crashed = dict()
         self.oldTime = rospy.Time.now()
         self.newTime = rospy.Time.now()
@@ -34,21 +37,37 @@ class Simulator:
         self.clock_sub = rospy.Subscriber("/clock", Clock, self.simulation_node, queue_size=1)
 
         for robot in self.robotList:
-            self.path_sub[robot] = rospy.Subscriber(robot + "/plan",
+            self.path_sub[robot] = rospy.Subscriber(robot + "/follow_path",
                                                       Path, self.plan_callback, robot, queue_size=1)
-            # self.odom_pub[robot] = rospy.Publisher(robot + "/odom", Odometry, queue_size=10)
+            self.cmd_vel_sub[robot] = rospy.Subscriber(robot + "/cmd_vel",
+                                                      Twist, self.cmd_vel_callback, robot, queue_size=1)
+            self.odom_pub[robot] = rospy.Publisher(robot + "/odom", Odometry, queue_size=10)
+            self.traj_pub[robot] = rospy.Publisher(robot + "/active_path", Path, queue_size=10)
             self.tf_pub = tf2_ros.TransformBroadcaster()
-            self.path[robot] = Path()
+            self.path[robot] = []
+            self.path_index[robot] = 0
             self.pose[robot] = rospy.wait_for_message(robot + "/initialpose", Pose)
-            rospy.loginfo("Received initial position for " + robot + "\n"+str(self.pose[robot]))
+            #rospy.loginfo("Received initial position for " + robot + "\n"+str(self.pose[robot]))
             self.crashed[robot] = False
+            self.cmd_vel[robot] = Twist()
 
             self.publish_data(robot)
 
-    def plan_callback(self, data, robot):
-        self.path[robot] = data
-        self.path_index[robot] = 0
+    def publish_active_path(self, robot):
+        pub_active_path = Path()
+        pub_active_path.header.frame_id = 'world'
+        for path in self.path[robot]:
+            pub_active_path.poses += path.poses
         
+        self.traj_pub[robot].publish(pub_active_path)
+            
+    def plan_callback(self, data, robot):
+        self.path[robot].append(data)
+        self.publish_active_path(robot)
+    
+    def cmd_vel_callback(self, data, robot):
+        self.cmd_vel[robot] = data
+    
     def print_real_time(self):
         new_real_time = time.clock()
         print '{0}\r'.format(new_real_time-self.old_real_time),
@@ -69,7 +88,7 @@ class Simulator:
         tf_msg.transform.rotation.w = self.pose[robot].orientation.w
         self.tf_pub.sendTransform(tf_msg)
 
-        """
+        
         odom_msg = Odometry()
         odom_msg.header.stamp = self.newTime
         odom_msg.header.frame_id = robot + "/odom"
@@ -77,7 +96,7 @@ class Simulator:
         odom_msg.pose.pose = self.pose[robot]
         odom_msg.twist.twist = self.cmd_vel[robot]
         self.odom_pub[robot].publish(odom_msg)
-        """
+        
         
     def find_crashes(self):
         for robot_1 in self.robotList:
@@ -92,27 +111,30 @@ class Simulator:
                         self.crashed[robot_2] = True
                         rospy.logwarn("%s and %s crashed!", robot_1, robot_2)
 
-    def calc_new_pose(self, robot, speed, time):
+    def calc_new_pose(self, robot, time):
         # If empty path, return current pose
-        if not len(self.path[robot].poses):
+        if len(self.path[robot]) == 0:
             return self.pose[robot]
-        # If speed is zero, robot is stationary
-        if speed == 0:
+        # If cmd_vel is zero, robot is stationary
+        if self.cmd_vel[robot].linear.x == 0:
             return self.pose[robot]
         
         # Calculate next position on Path
         spent_time = 0
         pose_old = self.pose[robot]
         while True:
-            if self.path_index[robot] + 1 == len(self.path[robot].poses):
+            if self.path_index[robot] + 1 == len(self.path[robot][0].poses):
+                self.path[robot].pop(0)
+                self.path_index[robot] = 0
+                self.publish_active_path(robot)
                 break
                 
-            pose_new = self.path[robot].poses[self.path_index[robot]+1].pose
+            pose_new = self.path[robot][0].poses[self.path_index[robot]+1].pose
             
             dist = math.sqrt((pose_old.position.x - pose_new.position.x) ** 2 +
                              (pose_old.position.y - pose_new.position.y) ** 2)
             
-            next_pose_time = dist / speed
+            next_pose_time = dist / self.cmd_vel[robot].linear.x
             if not spent_time + next_pose_time > time:
                 spent_time += next_pose_time
                 self.path_index[robot] += 1
@@ -139,7 +161,7 @@ class Simulator:
         for robot in self.robotList:
             if not self.crashed[robot]:
                 delta_time = (self.newTime - self.oldTime).to_sec()
-                self.pose[robot] = self.calc_new_pose(robot, 0.15, delta_time)
+                self.pose[robot] = self.calc_new_pose(robot, delta_time)
             self.publish_data(robot)
         self.find_crashes()
         self.oldTime = self.newTime
