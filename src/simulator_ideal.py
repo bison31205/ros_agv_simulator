@@ -127,6 +127,8 @@ class Simulator:
                 self.path[robot].pop(0)
                 self.path_index[robot] = 0
                 self.publish_active_path(robot)
+                if len(self.path[robot]) == 0:
+                    self.cmd_vel[robot] = Twist()
                 break
                 
             pose_new = self.path[robot][0].poses[self.path_index[robot]+1].pose
