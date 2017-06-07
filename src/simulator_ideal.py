@@ -110,6 +110,9 @@ class Simulator:
                         self.crashed[robot_1] = True
                         self.crashed[robot_2] = True
                         rospy.logwarn("%s and %s crashed!", robot_1, robot_2)
+                        # rospy.loginfo(str(self.pose[robot_1].position))
+                        # rospy.loginfo(str(self.pose[robot_2].position))
+                        
 
     def calc_new_pose(self, robot, time):
         # If empty path, return current pose
