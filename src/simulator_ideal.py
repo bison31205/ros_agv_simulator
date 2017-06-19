@@ -15,6 +15,7 @@ from nav_msgs.msg import Path
 
 class Simulator:
     def __init__(self):
+        self.init_done = False
         rospy.init_node('simulator_node', log_level=rospy.INFO)
         self.robotList = rospy.get_param('robot_list')
         self.showRealTime = rospy.get_param('~show_dt', False)
@@ -52,6 +53,8 @@ class Simulator:
             self.cmd_vel[robot] = Twist()
 
             self.publish_data(robot)
+        
+        self.init_done = True
 
     def publish_active_path(self, robot):
         pub_active_path = Path()
@@ -162,6 +165,8 @@ class Simulator:
         self.newTime = new_time.clock
         if self.showRealTime:
             self.print_real_time()
+        if not self.init_done:
+            return
         # simulate movement for each individual robot in simulated time
         for robot in self.robotList:
             if not self.crashed[robot]:
