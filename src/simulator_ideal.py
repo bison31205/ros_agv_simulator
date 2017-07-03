@@ -9,9 +9,10 @@ from rosgraph_msgs.msg import Clock
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import TransformStamped
+from visualization_msgs.msg import Marker
+from std_msgs.msg import ColorRGBA
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
-
 
 class Simulator:
     def __init__(self):
@@ -25,6 +26,8 @@ class Simulator:
         self.odom_pub = dict()
         self.traj_pub = dict()
         self.tf_pub = dict()
+        self.marker_pub = dict()
+        self.marker_color = dict()
         self.path = dict()
         self.path_index = dict()
         self.pose = dict()
@@ -45,6 +48,12 @@ class Simulator:
             self.odom_pub[robot] = rospy.Publisher(robot + "/odom", Odometry, queue_size=10)
             self.traj_pub[robot] = rospy.Publisher(robot + "/active_path", Path, queue_size=10)
             self.tf_pub = tf2_ros.TransformBroadcaster()
+            self.marker_pub[robot] = rospy.Publisher(robot + "/marker", Marker, queue_size=10)
+            self.marker_color[robot] = ColorRGBA()
+            self.marker_color[robot].a = 1.0
+            self.marker_color[robot].r = math.fabs(math.fmod(hash(robot) / 1.4e10, 1))
+            self.marker_color[robot].g = math.fabs(math.fmod(hash(robot) / 4.2e10, 1))
+            self.marker_color[robot].b = math.fabs(math.fmod(hash(robot) / 6.9e10, 1))
             self.path[robot] = []
             self.path_index[robot] = 0
             self.pose[robot] = rospy.wait_for_message(robot + "/initialpose", Pose)
@@ -78,6 +87,7 @@ class Simulator:
         self.old_real_time = new_real_time
 
     def publish_data(self, robot):
+        # Publish TF data
         tf_msg = TransformStamped()
         tf_msg.header.stamp = self.newTime
         tf_msg.header.frame_id = robot + "/odom"
@@ -91,7 +101,7 @@ class Simulator:
         tf_msg.transform.rotation.w = self.pose[robot].orientation.w
         self.tf_pub.sendTransform(tf_msg)
 
-        
+        # Publish Odometry data
         odom_msg = Odometry()
         odom_msg.header.stamp = self.newTime
         odom_msg.header.frame_id = robot + "/odom"
@@ -99,6 +109,21 @@ class Simulator:
         odom_msg.pose.pose = self.pose[robot]
         odom_msg.twist.twist = self.cmd_vel[robot]
         self.odom_pub[robot].publish(odom_msg)
+        
+        # Publish RViz markers data
+        
+        marker_msg = Marker()
+        marker_msg.header.stamp = self.newTime
+        marker_msg.header.frame_id = "world"
+        marker_msg.ns = "marker"
+        marker_msg.type = 3
+        marker_msg.action = 0
+        marker_msg.pose = self.pose[robot]
+        marker_msg.scale.x = 0.5
+        marker_msg.scale.y = 0.5
+        marker_msg.scale.z = 0.25
+        marker_msg.color = self.marker_color[robot]
+        self.marker_pub[robot].publish(marker_msg)
         
         
     def find_crashes(self):
