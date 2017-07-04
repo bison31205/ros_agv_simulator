@@ -7,13 +7,13 @@
   <param name="mission_file" type="string" value="$(find mission_publisher)/yaml/4_robot.yaml" />
   <param name="parameters_file" type="string" value="$(find robot_model)/learning_data/robot_001.yaml" />
   <param name="map_segments_file" type="string" value="$(find lattice_planner)/maps/test_map_segmented.yaml" />
-  <rosparam param="robot_list"> ['mirko', 'slavko'] </rosparam>
+  <rosparam param="robot_list"> ['mirko', 'slavko', 'maxo', 'kream'] </rosparam>
     
   <node pkg="rviz" type="rviz" name="rviz" />
     
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="mirko" />
-    <arg name="init_pose" value="'{position: {x: 0.50, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
+    <arg name="init_pose" value="'{position: {x: 0.5, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
     <arg name="output" value="screen" />
     <arg name="map_file" value="$(arg map_file)" />
   </include>
@@ -21,6 +21,20 @@
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="slavko" />
     <arg name="init_pose" value="'{position: {x: 9.5, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 1.0,w: 0.0}}'" />
+    <arg name="output" value="screen" />
+    <arg name="map_file" value="$(arg map_file)" />
+  </include>
+  
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="maxo" />
+    <arg name="init_pose" value="'{position: {x: 0.5, y: 8.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
+    <arg name="output" value="screen" />
+    <arg name="map_file" value="$(arg map_file)" />
+  </include>
+  
+  <include file="$(find robot_model)/launch/simple.launch">
+    <arg name="robot_name" value="kream" />
+    <arg name="init_pose" value="'{position: {x: 10.5, y: 7.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 1.0,w: 0.0}}'" />
     <arg name="output" value="screen" />
     <arg name="map_file" value="$(arg map_file)" />
   </include>
