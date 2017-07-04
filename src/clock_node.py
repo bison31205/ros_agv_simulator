@@ -12,17 +12,17 @@ from geometry_msgs.msg import PoseStamped
 class ClockNode:
      def __init__(self):
         rospy.init_node('clock_node', log_level=rospy.INFO)
-        self.robotList = rospy.get_param('robot_list')
-        self.time_modifier = float(rospy.get_param('~time_modifier', 0.1))
-        self.clock_pub = rospy.Publisher("clock", Clock, queue_size=10)
         
+        self.robotList = rospy.get_param('robot_list')
+        self.time_modifier = float(rospy.get_param('~time_modifier', 5))
+        self.clocks_per_second = float(rospy.get_param('~clocks_per_second', 30))
+        self.frame_duration = 1.0 / self.clocks_per_second
+        
+        self.clock_pub = rospy.Publisher("clock", Clock, queue_size=10)
+ 
         self.plan_sub = dict()
         self.goal_sub = dict()
         self.planner_active = dict()
-        
-        self.fps = 25
-        self.frame_duration = 1.0 / self.fps
-        
         self.pause_clock = False
         
         for robot in self.robotList:
