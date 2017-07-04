@@ -3,20 +3,25 @@
 import rospy
 import tf2_ros
 import time
+import threading
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
+
 
 class ClockNode:
      def __init__(self):
         rospy.init_node('clock_node', log_level=rospy.INFO)
         self.robotList = rospy.get_param('robot_list')
-        self.dT = float(rospy.get_param('~dT', 0.1))
+        self.time_modifier = float(rospy.get_param('~time_modifier', 0.1))
         self.clock_pub = rospy.Publisher("clock", Clock, queue_size=10)
         
         self.plan_sub = dict()
         self.goal_sub = dict()
         self.planner_active = dict()
+        
+        self.fps = 25
+        self.frame_duration = 1.0 / self.fps
         
         self.pause_clock = False
         
@@ -40,11 +45,13 @@ class ClockNode:
         self.pause_clock = not reactivate_clock
         
      def main(self):
-         while not rospy.is_shutdown():
-            if not self.pause_clock:
+        if not rospy.is_shutdown():
+            threading.Timer(self.frame_duration, self.main).start()
+        if not self.pause_clock:
                 msg = Clock()
-                msg.clock = msg.clock.from_sec(rospy.get_time() + self.dT)                        
+                msg.clock = msg.clock.from_sec(rospy.get_time() + self.frame_duration*self.time_modifier)                        
                 self.clock_pub.publish(msg)
+           
 
 if __name__ == '__main__':
     clock_node = ClockNode()

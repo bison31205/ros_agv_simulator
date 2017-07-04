@@ -1,9 +1,9 @@
 <launch>
   <arg name="map_file" value="$(find lattice_planner)/maps/test_map.yaml" />
   <param name="use_sim_time" value="true" />
-  <param name="clock_node/dT" type="double" value="0.01" />
+  <param name="clock_node/time_modifier" type="double" value="10" />
   <param name="simulator_node/show_dt" type="bool" value="False" />
-  <param name="mission_file" type="string" value="$(find mission_publisher)/yaml/simple.yaml" />
+  <param name="mission_file" type="string" value="$(find mission_publisher)/yaml/test_change_path.yaml" />
   <param name="parameters_file" type="string" value="$(find robot_model)/learning_data/robot_001.yaml" />
   <param name="map_segments_file" type="string" value="$(find lattice_planner)/maps/test_map_segmented.yaml" />
   <rosparam param="robot_list"> ['mirko', 'slavko'] </rosparam>
@@ -12,14 +12,14 @@
     
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="mirko" />
-    <arg name="init_pose" value="'{position: {x: 0.50, y: 8.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
+    <arg name="init_pose" value="'{position: {x: 0.50, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
     <arg name="output" value="screen" />
     <arg name="map_file" value="$(arg map_file)" />
   </include>
   
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="slavko" />
-    <arg name="init_pose" value="'{position: {x: 9.5, y: 8.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 1.0,w: 0.0}}'" />
+    <arg name="init_pose" value="'{position: {x: 4.5, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 1.0,w: 0.0}}'" />
     <arg name="output" value="screen" />
     <arg name="map_file" value="$(arg map_file)" />
   </include>
