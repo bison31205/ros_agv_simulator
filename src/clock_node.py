@@ -4,9 +4,12 @@ import rospy
 import tf2_ros
 import time
 import threading
+import psutil
+import subprocess, signal, os
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
+from msg_pkg.msg import Statistics
 
 
 class ClockNode:
@@ -23,6 +26,8 @@ class ClockNode:
  
         self.plan_sub = dict()
         self.goal_sub = dict()
+        self.exit_sub = dict()
+        self.robot_is_done = dict()
         self.planner_active = dict()
         self.pause_clock = False
         
@@ -32,6 +37,19 @@ class ClockNode:
                                                       Path, self.plan_callback, robot, queue_size=1)
             self.goal_sub[robot] = rospy.Subscriber(robot + "/goal",
                                                       PoseStamped, self.goal_callback, robot, queue_size=1)
+            self.exit_sub[robot] = rospy.Subscriber("exit_state/" + robot,
+                                                      Statistics, self.exit_callback, robot, queue_size=1)
+            self.robot_is_done[robot] = False
+     
+     def exit_callback(self, goal, robot):
+        self.robot_is_done[robot] = True
+        if all(flag for flag in self.robot_is_done.values()):
+            p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+            out, err = p.communicate()
+            for line in out.splitlines():
+                if 'roslaunch' in line:
+                    pid = int(line.split(None, 1)[0])
+                    os.kill(pid, signal.SIGINT)
      
      def goal_callback(self, goal, robot):
         self.pause_clock = True

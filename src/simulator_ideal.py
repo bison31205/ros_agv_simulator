@@ -5,6 +5,7 @@ import PyKDL
 import math
 import tf2_ros
 import time
+import threading
 from rosgraph_msgs.msg import Clock
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Pose
@@ -14,7 +15,10 @@ from std_msgs.msg import ColorRGBA
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
 
+
 class Simulator:
+    exit_simulator = threading.Event()
+    
     def __init__(self):
         self.init_done = False
         rospy.init_node('simulator_node', log_level=rospy.INFO)
@@ -62,9 +66,13 @@ class Simulator:
             self.cmd_vel[robot] = Twist()
 
             self.publish_data(robot)
-        
+            
+        rospy.on_shutdown(self.publish_exit_event)
         self.init_done = True
-
+        
+    def publish_exit_event():
+        exit_simulator.set()
+            
     def publish_active_path(self, robot):
         pub_active_path = Path()
         pub_active_path.header.frame_id = 'world'
@@ -203,5 +211,5 @@ class Simulator:
 
 if __name__ == '__main__':
     sim = Simulator()
-    while not rospy.is_shutdown(): pass
+    sim.exit_simulator.wait()
     
