@@ -4,7 +4,6 @@ import rospy
 import tf2_ros
 import time
 import threading
-import psutil
 import subprocess, signal, os
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Path
@@ -74,4 +73,6 @@ class ClockNode:
 
 if __name__ == '__main__':
     clock_node = ClockNode()
+    raw_input('Press enter to start /clock node...\n')
     clock_node.main()
+    
