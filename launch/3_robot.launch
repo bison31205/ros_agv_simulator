@@ -4,10 +4,12 @@
   <param name="clock_node/time_modifier" type="double" value="3" />
   <param name="clock_node/clocks_per_second" type="double" value="10" />
   <param name="simulator_node/show_dt" type="bool" value="False" />
-  <param name="mission_file" type="string" value="$(find mission_publisher)/yaml/3_robot.yaml" />
+  <param name="missions_file" type="string" value="$(find mission_publisher)/yaml/3_robot.yaml" />
   <param name="parameters_file" type="string" value="$(find robot_model)/learning_data/robot_001.yaml" />
   <param name="map_zones_file" type="string" value="$(find lattice_planner)/maps/test_map_segmented.yaml" />
   <rosparam param="robot_list"> ['mirko', 'slavko', 'maxo'] </rosparam>
+  <param name="segment_time" type="double" value="7" />
+  <param name="max_speed" type="double" value="0.2" />
     
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find simulator)/rviz/3_robota.rviz"/>
   
@@ -16,7 +18,7 @@
     
   <include file="$(find robot_model)/launch/simple.launch">
     <arg name="robot_name" value="mirko" />
-    <arg name="init_pose" value="'{position: {x: 0.5, y: 3.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 0.0,w: 1.0}}'" />
+    <arg name="init_pose" value="'{position: {x: 10.5, y: 7.0, z: 0.0}, orientation: {x: 0.0,y: 0.0,z: 1.0,w: 0.0}}'" />
     <arg name="output" value="screen" />
   </include>
   

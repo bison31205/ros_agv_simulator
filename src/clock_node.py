@@ -16,8 +16,8 @@ class ClockNode:
         rospy.init_node('clock_node', log_level=rospy.INFO)
         
         self.robotList = rospy.get_param('robot_list')
-        self.time_modifier = float(rospy.get_param('~time_modifier', 5))
-        self.clocks_per_second = float(rospy.get_param('~clocks_per_second', 30))
+        self.time_modifier = float(rospy.get_param('~time_modifier', 3))
+        self.clocks_per_second = float(rospy.get_param('~clocks_per_second', 10))
         
         self.frame_duration = 1.0 / self.clocks_per_second
         
@@ -36,12 +36,14 @@ class ClockNode:
                                                       Path, self.plan_callback, robot, queue_size=1)
             self.goal_sub[robot] = rospy.Subscriber(robot + "/goal",
                                                       PoseStamped, self.goal_callback, robot, queue_size=1)
-            self.exit_sub[robot] = rospy.Subscriber("exit_state/" + robot,
+            self.exit_sub[robot] = rospy.Subscriber("exit_performance/" + robot,
                                                       Statistics, self.exit_callback, robot, queue_size=1)
             self.robot_is_done[robot] = False
      
      def exit_callback(self, goal, robot):
         self.robot_is_done[robot] = True
+        print robot
+        print goal
         if all(flag for flag in self.robot_is_done.values()):
             p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
             out, err = p.communicate()

@@ -4,7 +4,7 @@
   <param name="clock_node/time_modifier" type="double" value="5" />
   <param name="clock_node/clocks_per_second" type="double" value="30" />
   <param name="simulator_node/show_dt" type="bool" value="False" />
-  <param name="mission_file" type="string" value="$(find mission_publisher)/yaml/test_speed.yaml" />
+  <param name="missions_file" type="string" value="$(find mission_publisher)/yaml/test_speed.yaml" />
   <param name="parameters_file" type="string" value="$(find robot_model)/learning_data/robot_001.yaml" />
   <param name="map_zones_file" type="string" value="$(find lattice_planner)/maps/test_map_segmented.yaml" />
   <rosparam param="robot_list"> ['mirko', 'slavko'] </rosparam>
